@@ -1,0 +1,114 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    id               String         @id @default(uuid())
+    gender           String
+    firstname        String
+    lastname         String
+    email            String         @unique
+    emailVerifiedAt  DateTime?
+    password         String
+    phone            String
+    modelType        String
+    hasMobileAccess  Boolean
+    profilePhotoPath String?
+    lastLoginAt      DateTime?
+    lastLoginIp      String?
+    createdAt        DateTime       @default(now())
+    updatedAt        DateTime       @updatedAt
+    RefreshToken     RefreshToken[]
+    UserRole         UserRole[]
+
+    @@map("users")
+}
+
+model RefreshToken {
+    id        String   @id @default(uuid())
+    token     String   @unique
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    expiresAt DateTime
+
+    @@map("refresh_token")
+}
+
+model UserRole {
+    userId    String
+    roleId    String
+    user      User     @relation(fields: [userId], references: [id])
+    role      Role     @relation(fields: [roleId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@id([userId, roleId])
+    @@map("model_has_roles")
+}
+
+model Role {
+    id                String              @id @default(uuid())
+    name              String              @unique
+    createdAt         DateTime            @default(now())
+    updatedAt         DateTime            @updatedAt
+    RoleHasPermission RoleHasPermission[]
+    UserRole          UserRole[]
+
+    @@map("roles")
+}
+
+model Permission {
+    id                String              @id @default(uuid())
+    name              String              @unique
+    createdAt         DateTime            @default(now())
+    updatedAt         DateTime            @updatedAt
+    RoleHasPermission RoleHasPermission[]
+
+    @@map("permissions")
+}
+
+model RoleHasPermission {
+    roleId       String
+    permissionId String
+    role         Role       @relation(fields: [roleId], references: [id])
+    permission   Permission @relation(fields: [permissionId], references: [id])
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @updatedAt
+
+    @@id([roleId, permissionId])
+    @@map("role_has_permissions")
+}
+
+model Customer {
+    id                   Int      @id @default(autoincrement())
+    number               String
+    type                 String
+    gender               String?
+    firstname            String?
+    lastname             String?
+    company_name         String?
+    company_fj           String?
+    company_ice          String?
+    phone                String
+    email                String
+    adresse              String
+    postal_code          String
+    city                 String
+    country              String
+    adresse_shipping     String?
+    postal_code_shipping String?
+    city_shipping        String?
+    country_shipping     String?
+    statut               String
+    created_by           String
+    createdAt            DateTime @default(now())
+    updatedAt            DateTime @updatedAt
+
+    @@map("customers")
+}
