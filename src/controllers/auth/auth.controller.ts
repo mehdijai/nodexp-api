@@ -6,11 +6,12 @@ import {
   refreshTokens,
 } from '@/services/auth/auth.service';
 import { sendSuccessResponse, sendUnauthorizedResponse } from '@/utils/responseHandler';
-import { TAuthSchema } from '@/validations/auth';
+import { authSchema, refreshTokenSchema, TAuthSchema } from '@/validations/auth';
 import { comparePasswords } from '@/utils/bcryptHandler';
 import { generateAccessToken, generateRefreshToken } from '@/utils/jwtHandler';
 import { _Controller, BaseController, Controller, Get, Post } from '..';
 import { API_VERSION } from '@/config/version.config';
+import { validate } from '@/middlewares/validateMiddleware';
 
 /**
  * @swagger
@@ -46,7 +47,7 @@ export default class AuthController extends BaseController {
    *       401:
    *         description: Invalid credentials
    */
-  @Post('/login')
+  @Post('/login', [validate(authSchema)])
   public async login(request: Request<{}, TAuthSchema>, response: Response, next: NextFunction) {
     try {
       const authRequest = request.body;
@@ -101,7 +102,7 @@ export default class AuthController extends BaseController {
    *       401:
    *         description: Invalid refresh token
    */
-  @Post('/refresh')
+  @Post('/refresh', [validate(refreshTokenSchema)])
   public async refresh(request: Request, response: Response, next: NextFunction) {
     try {
       const { refreshToken } = request.body;

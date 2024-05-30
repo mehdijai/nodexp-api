@@ -1,9 +1,10 @@
 import 'reflect-metadata';
-import { Router, Express } from 'express';
+import { Router, Express, RequestHandler } from 'express';
 
 interface Route {
   path: string;
   methodName: string;
+  middlewares: RequestHandler[];
   method: 'get' | 'post' | 'patch' | 'put' | 'delete';
 }
 
@@ -19,33 +20,33 @@ function HTTPMethodDecorator(route: Route, target: Object) {
 }
 
 // Decorator for defining Express GET routes
-export function Get(path: string) {
+export function Get(path: string, middlewares: RequestHandler[] = []) {
   return function (target: Object, propertyKey: string, _: PropertyDescriptor) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'get' }, target);
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'get', middlewares }, target);
   };
 }
 // Decorator for defining Express GET routes
-export function Post(path: string) {
+export function Post(path: string, middlewares: RequestHandler[] = []) {
   return function (target: Object, propertyKey: string, _: PropertyDescriptor) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'post' }, target);
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'post', middlewares }, target);
   };
 }
 // Decorator for defining Express GET routes
-export function Patch(path: string) {
+export function Patch(path: string, middlewares: RequestHandler[] = []) {
   return function (target: Object, propertyKey: string, _: PropertyDescriptor) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'patch' }, target);
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'patch', middlewares }, target);
   };
 }
 // Decorator for defining Express GET routes
-export function Put(path: string) {
+export function Put(path: string, middlewares: RequestHandler[] = []) {
   return function (target: Object, propertyKey: string, _: PropertyDescriptor) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'put' }, target);
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'put', middlewares }, target);
   };
 }
 // Decorator for defining Express GET routes
-export function Delete(path: string) {
+export function Delete(path: string, middlewares: RequestHandler[] = []) {
   return function (target: Object, propertyKey: string, _: PropertyDescriptor) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'delete' }, target);
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'delete', middlewares }, target);
   };
 }
 
@@ -53,12 +54,6 @@ export function Controller(version?: string, prefix?: string) {
   return function (target: Function) {
     Reflect.defineMetadata('prefix', prefix ?? '', target);
     Reflect.defineMetadata('version', version ?? '', target);
-  };
-}
-
-export function API(summary: string, responses: any): Function {
-  return function (target: any, propertyKey: string | symbol) {
-    Reflect.defineMetadata('api', { summary, responses }, target, propertyKey);
   };
 }
 
@@ -77,23 +72,7 @@ export class _Controller {
     routes.forEach((route: Route) => {
       const handler =
         controllerClass.prototype[route.methodName as keyof typeof controllerClass.prototype];
-      switch (route.method) {
-        case 'get':
-          this.router.get(route.path, handler);
-          break;
-        case 'post':
-          this.router.post(route.path, handler);
-          break;
-        case 'patch':
-          this.router.patch(route.path, handler);
-          break;
-        case 'put':
-          this.router.put(route.path, handler);
-          break;
-        case 'delete':
-          this.router.delete(route.path, handler);
-          break;
-      }
+      this.router[route.method](route.path, ...route.middlewares, handler);
     });
 
     app.use(version + prefix, this.router);
