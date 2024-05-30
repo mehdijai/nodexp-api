@@ -6,10 +6,17 @@ export const loginUser = async (email: string) => {
     where: {
       email,
     },
+    include: {
+      role: {
+        include: {
+          permissions: true,
+        },
+      },
+    },
   });
 };
 
-export const createRefreshToken = async (refreshToken: string, userId: number) => {
+export const createRefreshToken = async (refreshToken: string, userId: string) => {
   return prisma.refreshToken.create({
     data: {
       token: refreshToken,
@@ -40,27 +47,4 @@ export const refreshTokens = async (refreshToken: string) => {
   });
 
   return { accessToken: newAccessToken, refreshToken: newRefreshToken };
-};
-
-export const getUserRole = async (userId: number) => {
-  return prisma.userRole.findFirst({
-    where: {
-      userId: userId,
-    },
-    include: {
-      role: {
-        include: {
-          RoleHasPermission: {
-            include: {
-              permission: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
 };

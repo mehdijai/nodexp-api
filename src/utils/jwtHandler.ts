@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 const SECRET_KEY = process.env.JWT_SECRET_KEY || 'your_secret_key';
 const REFRESH_SECRET_KEY = process.env.JWT_REFRESH_SECRET_KEY || 'your_refresh_secret_key';
 
-export const generateAccessToken = (userId: number) => {
+export const generateAccessToken = (userId: string) => {
   return jwt.sign({ userId }, SECRET_KEY, { expiresIn: 60 });
 };
 

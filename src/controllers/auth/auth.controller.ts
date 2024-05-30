@@ -1,10 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import {
-  createRefreshToken,
-  getUserRole,
-  loginUser,
-  refreshTokens,
-} from '@/services/auth/auth.service';
+import { createRefreshToken, loginUser, refreshTokens } from '@/services/auth/auth.service';
 import { sendSuccessResponse, sendUnauthorizedResponse } from '@/utils/responseHandler';
 import { authSchema, refreshTokenSchema, TAuthSchema } from '@/validations/auth';
 import { comparePasswords } from '@/utils/bcryptHandler';
@@ -65,19 +60,28 @@ export default class AuthController extends BaseController {
         const refreshToken = generateRefreshToken();
         await createRefreshToken(refreshToken, user.id);
 
-        const userRole: any = await getUserRole(user.id);
-
         const accessToken = {
           token: token,
           refreshToken: refreshToken,
         };
-        const permissions = userRole.role.RoleHasPermission.map((rp: any) => rp.permission.name);
 
         const responseData = {
           accessToken: accessToken,
-          user: user,
-          role: userRole.role.name,
-          permissions: permissions,
+          user: {
+            id: user.id,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            gender: user.gender,
+            email: user.email,
+            phone: user.phone,
+            modelType: user.modelType,
+            hasMobileAccess: user.hasMobileAccess,
+            profilePhotoPath: user.profilePhotoPath,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+          },
+          role: user.role.name,
+          permissions: user.role.permissions.map((rp: any) => rp.name),
         };
         sendSuccessResponse(response, responseData);
         return;
