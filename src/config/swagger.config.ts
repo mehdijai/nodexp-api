@@ -1,33 +1,40 @@
-import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Application } from 'express';
 import { join } from 'path';
+import swaggerJSDoc from 'swagger-jsdoc';
 
-const routePath = join(__dirname, '../../src/**/*.route.ts');
-const routeChildPath = join(__dirname, '../../src/**/*.route.ts');
+const controllersPath = join(__dirname, '../controllers/**/**/*.controller.ts');
 
 const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
-    title: 'Open API',
+    title: process.env.PROJECT_NAME ?? 'NodeExp',
     version: '1.0.0',
   },
   servers: [
     {
-      url: 'http://localhost:3000',
+      url: `http://localhost:${process.env.PORT}`,
     },
   ],
+  externalDocs: {
+    description: 'swagger.json',
+    url: '/api-docs/swagger.json',
+  },
 };
 
-const options = {
+const options: swaggerJSDoc.Options = {
   swaggerDefinition,
-  apis: [routePath, routeChildPath],
+  apis: [controllersPath],
 };
 
-const specs = swaggerJsdoc(options);
+const specs = swaggerJSDoc(options);
 
 const setupSwagger = (app: Application): void => {
   app.use(`/api-docs`, swaggerUi.serve, swaggerUi.setup(specs));
+  app.get('/swagger.json', (_, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(specs);
+  });
 };
 
 export default setupSwagger;

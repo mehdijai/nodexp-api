@@ -1,14 +1,12 @@
 import path from 'path';
 import express, { Express } from 'express';
 import bodyParser from 'body-parser';
-import { API_VERSION } from './config/version.config';
 import { errorHandler } from './middlewares/errorHandlerMiddleware';
 import { notFoundHandler } from './middlewares/notFoundHandler';
 import securityMiddleware from './middlewares/securityMiddleware';
-import AuthRouter from './routers/auth.route';
 import setupSwagger from './config/swagger.config';
 import { config } from 'dotenv';
-import GuardRouter from './routers/guard.route';
+import { scanForControllers, registeredControllers } from './utils/ControllerScanner';
 
 config();
 
@@ -18,6 +16,7 @@ export class App {
     this.app = express();
     this.initMiddlewares();
     this.setupSwagger();
+    this.setupControllers();
     this.setupRouter();
   }
 
@@ -43,10 +42,15 @@ export class App {
     setupSwagger(this.app);
   }
 
+  private setupControllers() {
+    scanForControllers();
+
+    registeredControllers.forEach((controllerClass) => {
+      controllerClass.registerRoutes(this.app);
+    });
+  }
   private setupRouter() {
     // Routes Handling
-    this.app.use(`${API_VERSION}/auth`, new AuthRouter().router);
-    this.app.use(`${API_VERSION}`, new GuardRouter().router);
 
     // Index page
     this.app.use(express.static(path.join(__dirname, '../public')));

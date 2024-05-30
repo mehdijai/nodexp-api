@@ -9,6 +9,8 @@
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true, 
     "noUnusedLocals": false,
     "noUnusedParameters": true,
     "noImplicitAny": true,
