@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { _Controller, BaseController, Controller, Get } from '..';
+import { _Controller, AuthGuard, BaseController, Controller, Get } from '..';
 import { API_VERSION } from '@/config/version.config';
-import { authenticateJWT } from '@/middlewares/authMiddleware';
 import { getCustomers } from '@/services/customer.service';
 
 /**
@@ -10,7 +9,7 @@ import { getCustomers } from '@/services/customer.service';
  *   name: Customer
  *   description: Customer endpoints
  */
-@Controller(API_VERSION, '/customer')
+@Controller(API_VERSION, '/customers')
 export default class CustomerController extends BaseController {
   /**
    * @swagger
@@ -24,7 +23,8 @@ export default class CustomerController extends BaseController {
    *       401:
    *         description: Unauthorized
    */
-  @Get('/', [authenticateJWT])
+  @AuthGuard()
+  @Get('/')
   public async getCustomers(_: Request, response: Response, next: NextFunction) {
     try {
       const customers = await getCustomers();

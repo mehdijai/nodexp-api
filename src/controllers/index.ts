@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { Router, Express, RequestHandler } from 'express';
+import { authenticateJWT } from '@/middlewares/authMiddleware';
 
 interface Route {
   path: string;
@@ -47,6 +48,19 @@ export function Put(path: string, middlewares: RequestHandler[] = []) {
 export function Delete(path: string, middlewares: RequestHandler[] = []) {
   return function (target: Object, propertyKey: string, _: PropertyDescriptor) {
     HTTPMethodDecorator({ path, methodName: propertyKey, method: 'delete', middlewares }, target);
+  };
+}
+// Decorator for defining Express GET routes
+export function AuthGuard() {
+  return function (target: Object, propertyKey: string, _: PropertyDescriptor) {
+    const existingRoutes: Route[] =
+      Reflect.getMetadata('routes', target.constructor.prototype) || [];
+    const match = existingRoutes.find((route) => route.methodName === propertyKey);
+
+    if (match) {
+      match.middlewares.push(authenticateJWT);
+    }
+    Reflect.defineMetadata('routes', existingRoutes, target);
   };
 }
 
