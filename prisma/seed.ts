@@ -1,30 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 import { seedCustomers } from './seeders/customers.seed';
 import bcrypt from 'bcryptjs';
+import { roleAndPermissionsSeeder } from './seeders/roleAndPermissionsSeeder';
 
 const prisma = new PrismaClient();
 
 async function main() {
   try {
-    const role = await prisma.role.create({
-      data: { name: 'administrator' },
-    });
+    const roleId = await roleAndPermissionsSeeder(prisma);
 
-    const abilities = ['read', 'write', 'create', 'edit', 'validate'];
-
-    const permissionsData = abilities.flatMap((ability) => [
-      { name: `${ability} user management`, roleId: role.id },
-    ]);
-
-    for (const permission of permissionsData) {
-      await prisma.permission.create({
-        data: permission,
-      });
-    }
-
-    await prisma.user.create({
+    const adminUser = await prisma.user.create({
       data: {
-        roleId: role.id,
+        roleId: roleId,
         modelType: 'Web',
         hasMobileAccess: false,
         gender: 'man',
@@ -37,7 +24,7 @@ async function main() {
       },
     });
 
-    await seedCustomers();
+    await seedCustomers(adminUser.id);
     console.log('Seed data inserted successfully');
   } catch (error) {
     console.error('Error inserting seed data:', error);

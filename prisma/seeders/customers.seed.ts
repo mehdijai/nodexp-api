@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
-export async function seedCustomers() {
+export async function seedCustomers(creatorId: string) {
   const status = ['Active', 'Inactive', 'Encours'];
   const type = ['Particulier', 'Entreprise'];
   const fj = ['SARL', 'SARL AU', 'SA'];
@@ -28,7 +28,7 @@ export async function seedCustomers() {
     city_shipping: 'Casablanca',
     country_shipping: 'Maroc',
     statut: faker.helpers.arrayElement(status),
-    created_by: 'Admin',
+    created_by: creatorId,
   }));
 
   await prisma.customer.createMany({

@@ -26,6 +26,7 @@ model User {
     refreshToken     RefreshToken[]
     createdAt        DateTime       @default(now())
     updatedAt        DateTime       @updatedAt
+    Customer         Customer[]
 
     @@map("users")
 }
@@ -85,6 +86,7 @@ model Customer {
     country_shipping     String?
     statut               String
     created_by           String
+    creator              User     @relation(fields: [created_by], references: [id])
     createdAt            DateTime @default(now())
     updatedAt            DateTime @updatedAt
 
