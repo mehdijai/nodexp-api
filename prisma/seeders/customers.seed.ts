@@ -1,31 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-
+import {
+  CompanyStatus,
+  CompanyLegalStatus,
+  CustomerType,
+  Genders,
+  CustomerStatus,
+} from '../../src/types/enums';
 const prisma = new PrismaClient();
-
-enum CompanyStatus {
-  ACTIVE = 'Active',
-  INACTIVE = 'Inactive',
-  IN_PROGRESS = 'Encours',
-}
-enum Genders {
-  MALE = 'M.',
-  FEMALE = 'F.',
-}
-enum CustomerStatus {
-  ACTIVE = 'Active',
-  INACTIVE = 'Inactive',
-  IN_PROGRESS = 'Encours',
-}
-enum CustomerType {
-  INDIVIDUAL = 'Particulier',
-  BUSINESS = 'Entreprise',
-}
-enum CompanyLegalStatus {
-  SARL = 'SARL',
-  SARL_AU = 'SARL AU',
-  SA = 'SA',
-}
 
 export async function seedCustomers(creatorId: string) {
   const company = await prisma.company.create({

@@ -18,7 +18,7 @@ const swaggerDefinition = {
   ],
   externalDocs: {
     description: 'swagger.json',
-    url: '/api-docs/swagger.json',
+    url: '/swagger.json',
   },
 };
 

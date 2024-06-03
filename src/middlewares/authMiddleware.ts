@@ -1,13 +1,9 @@
-import {  sendForbiddenResponse, sendUnauthorizedResponse } from '@/utils/responseHandler';
-import { Request, Response, NextFunction } from 'express';
+import { sendForbiddenResponse, sendUnauthorizedResponse } from '@/utils/responseHandler';
+import { Response, NextFunction } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
-import { errorHandler } from './errorHandlerMiddleware';
+import { AuthenticatedRequest } from '@/types/auth.types';
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY || 'your_secret_key';
-
-interface AuthenticatedRequest extends Request {
-  user?: any;
-}
 
 export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
@@ -16,9 +12,9 @@ export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: 
     const token = authHeader.split(' ')[1];
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
-      if (err) {
-        if(err instanceof TokenExpiredError) {
-          sendUnauthorizedResponse(res, 'Unauthenticated')
+      if (err || !user) {
+        if (err instanceof TokenExpiredError) {
+          sendUnauthorizedResponse(res, 'Unauthenticated');
         } else {
           sendForbiddenResponse(res, 'Access forbidden: Invalid token');
         }
