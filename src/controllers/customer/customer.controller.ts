@@ -7,7 +7,7 @@ import {
   TUpdateCustomerSchema,
 } from '@/validations/crm/customer';
 import { AuthenticatedRequest } from '@/types/auth.types';
-import { sendNotFoundResponse } from '@/utils/responseHandler';
+import { apiResponse, ResponseHandler } from '@/utils/responseHandler';
 import CustomerService from '@/services/CRM/customer.service';
 
 /**
@@ -295,7 +295,7 @@ export default class CustomerController extends BaseController {
   ) {
     try {
       const customers = await this.customerService.getCustomers(req.query);
-      response.json(customers);
+      apiResponse(response, customers);
     } catch (err) {
       next(err);
     }
@@ -333,7 +333,7 @@ export default class CustomerController extends BaseController {
   ) {
     try {
       const customers = await this.customerService.getCustomers(req.query, true);
-      response.json(customers);
+      apiResponse(response, customers);
     } catch (err) {
       next(err);
     }
@@ -365,7 +365,7 @@ export default class CustomerController extends BaseController {
       const user = req.user;
       const body: TCreateCustomerSchema = req.body;
       const customer = await this.customerService.createCustomer(user.userId, body);
-      response.json(customer);
+      apiResponse(response, customer);
     } catch (err) {
       next(err);
     }
@@ -400,9 +400,9 @@ export default class CustomerController extends BaseController {
     try {
       const customer = await this.customerService.updateCustomer(req.body);
       if (!customer) {
-        sendNotFoundResponse(response, 'Customer not found');
+        ResponseHandler.setResponse(response).NotFound('Customer not found');
       } else {
-        response.json(customer);
+        apiResponse(response, customer);
       }
     } catch (err) {
       next(err);
@@ -444,9 +444,9 @@ export default class CustomerController extends BaseController {
     try {
       const customer = await this.customerService.removeCustomer(req.body.id);
       if (!customer) {
-        sendNotFoundResponse(response, 'Customer not found');
+        ResponseHandler.setResponse(response).NotFound('Customer not found');
       } else {
-        response.json(customer);
+        apiResponse(response, customer);
       }
     } catch (err) {
       next(err);
@@ -488,9 +488,9 @@ export default class CustomerController extends BaseController {
     try {
       const customer = await this.customerService.restoreCustomer(req.body.id);
       if (!customer) {
-        sendNotFoundResponse(response, 'Customer not found');
+        ResponseHandler.setResponse(response).NotFound('Customer not found');
       } else {
-        response.json(customer);
+        apiResponse(response, customer);
       }
     } catch (err) {
       next(err);
@@ -532,9 +532,9 @@ export default class CustomerController extends BaseController {
     try {
       const customer = await this.customerService.deleteCustomer(req.body.id);
       if (!customer) {
-        sendNotFoundResponse(response, 'Customer not found');
+        ResponseHandler.setResponse(response).NotFound('Customer not found');
       } else {
-        response.json(customer);
+        apiResponse(response, customer);
       }
     } catch (err) {
       next(err);
@@ -567,9 +567,9 @@ export default class CustomerController extends BaseController {
     try {
       const customer = await this.customerService.getCustomer(req.params.id);
       if (!customer) {
-        sendNotFoundResponse(response, 'Customer not found');
+        ResponseHandler.setResponse(response).NotFound('Customer not found');
       } else {
-        response.json(customer);
+        apiResponse(response, customer);
       }
     } catch (err) {
       next(err);

@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { sendSuccessResponse, sendUnauthorizedResponse } from '@/utils/responseHandler';
 import { authSchema, refreshTokenSchema, TAuthSchema } from '@/validations/auth';
-import { comparePasswords } from '@/utils/bcryptHandler';
 import { generateAccessToken, generateRefreshToken } from '@/utils/jwtHandler';
 import { BaseController, Controller, Post } from '..';
 import { API_VERSION } from '@/config/version.config';
 import { validate } from '@/middlewares/validateMiddleware';
 import AuthService from '@/services/auth/auth.service';
-
+import bcrypt from 'bcryptjs';
+import { apiResponse, ResponseHandler } from '@/utils/responseHandler';
 /**
  * @swagger
  * tags:
@@ -52,11 +51,11 @@ export default class AuthController extends BaseController {
       const user = await this.authService.loginUser(authRequest.email);
 
       if (!user) {
-        sendUnauthorizedResponse(response, 'Credentials Error');
+        ResponseHandler.setResponse(response).Unauthorized('Credentials Error');
         return;
       }
 
-      const isValidPassword = await comparePasswords(authRequest.password, user.password);
+      const isValidPassword = await bcrypt.compare(authRequest.password, user.password);
 
       if (isValidPassword) {
         const token = generateAccessToken(user.id);
@@ -86,10 +85,11 @@ export default class AuthController extends BaseController {
           role: user.role.name,
           permissions: user.role.permissions.map((rp: any) => rp.name),
         };
-        sendSuccessResponse(response, responseData);
+        apiResponse(response, responseData);
         return;
       } else {
-        sendUnauthorizedResponse(response, 'Password not match');
+        ResponseHandler.setResponse(response).Unauthorized('Password not match');
+
         return;
       }
     } catch (err) {

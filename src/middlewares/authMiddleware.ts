@@ -1,7 +1,7 @@
-import { sendForbiddenResponse, sendUnauthorizedResponse } from '@/utils/responseHandler';
 import { Response, NextFunction } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { AuthenticatedRequest } from '@/types/auth.types';
+import { ResponseHandler } from '@/utils/responseHandler';
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY || 'your_secret_key';
 
@@ -14,9 +14,9 @@ export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: 
     jwt.verify(token, SECRET_KEY, (err, user) => {
       if (err || !user) {
         if (err instanceof TokenExpiredError) {
-          sendUnauthorizedResponse(res, 'Unauthenticated');
+          ResponseHandler.setResponse(res).Unauthorized('Unauthenticated');
         } else {
-          sendForbiddenResponse(res, 'Access forbidden: Invalid token');
+          ResponseHandler.setResponse(res).Forbidden('Access forbidden: Invalid token');
         }
         return;
       }
@@ -24,6 +24,6 @@ export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: 
       next();
     });
   } else {
-    sendUnauthorizedResponse(res, 'Access denied: No token provided');
+    ResponseHandler.setResponse(res).Unauthorized('Access denied: No token provided');
   }
 }
