@@ -6,7 +6,7 @@ import { notFoundHandler } from './middlewares/notFoundHandler';
 import securityMiddleware from './middlewares/securityMiddleware';
 import setupSwagger from './config/swagger.config';
 import { config } from 'dotenv';
-import { scanForControllers, registeredControllers } from './utils/ControllerScanner';
+import { scanForControllers } from './utils/ControllerScanner';
 
 config();
 
@@ -43,11 +43,7 @@ export class App {
   }
 
   private setupControllers() {
-    scanForControllers();
-
-    registeredControllers.forEach((controllerClass) => {
-      controllerClass.registerRoutes(this.app);
-    });
+    scanForControllers(this.app);
   }
   private setupRouter() {
     // Routes Handling

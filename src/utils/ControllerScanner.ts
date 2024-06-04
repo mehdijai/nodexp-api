@@ -4,11 +4,10 @@ import 'reflect-metadata';
 
 interface Controller {
   registerRoutes(app: Express): void;
+  new (...args: any[]): void;
 }
 
-const registeredControllers: Controller[] = [];
-
-function scanForControllers() {
+function scanForControllers(app: Express) {
   const fs = require('fs'); // Require fs module (assuming Node.js environment)
 
   function walkDir(currentDir: string) {
@@ -24,9 +23,18 @@ function scanForControllers() {
           const controller = require(filePath).default; // Require the controller module
 
           if (controller && typeof controller === 'function' && controller.prototype) {
-            // Check for function with prototype
-            // Likely a controller class
-            registeredControllers.push(controller);
+            const params = Reflect.getMetadata('design:paramtypes', controller) || [];
+            const resolvedParams = params.map((param: any) => {
+              // Check if dependency matches parameter type
+              if (typeof param === 'function') {
+                return new param();
+              }
+              // Handle non-dependency parameters (e.g., primitive types)
+              return undefined;
+            });
+            const instance = new controller(...resolvedParams);
+            instance._registerRoutes(app, instance);
+            // registeredControllers.push(controller);
           } else {
             console.warn(`Ignoring non-controller export in: ${filePath}`); // Handle non-constructible exports
           }
@@ -40,4 +48,4 @@ function scanForControllers() {
   walkDir(join(__dirname, '../controllers')); // Start the recursive walk from the specified directory
 }
 
-export { scanForControllers, registeredControllers };
+export { scanForControllers };

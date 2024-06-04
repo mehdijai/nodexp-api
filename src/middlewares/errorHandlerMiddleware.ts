@@ -1,14 +1,12 @@
 import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import { JsonWebTokenError } from 'jsonwebtoken';
 import {
   sendBadRequestResponse,
   sendErrorResponse,
-  sendUnauthorizedResponse,
   sendValidationError,
 } from '@/utils/responseHandler';
-import { refreshTokens } from '@/services/auth/auth.service';
 
 function parseZodErrors(errors: ZodError) {
   return errors.errors.map((err) => `${err.path.join(', ')}: ${err.message}`);

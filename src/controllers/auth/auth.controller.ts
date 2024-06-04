@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { createRefreshToken, loginUser, refreshTokens } from '@/services/auth/auth.service';
 import { sendSuccessResponse, sendUnauthorizedResponse } from '@/utils/responseHandler';
 import { authSchema, refreshTokenSchema, TAuthSchema } from '@/validations/auth';
 import { comparePasswords } from '@/utils/bcryptHandler';
 import { generateAccessToken, generateRefreshToken } from '@/utils/jwtHandler';
-import { _Controller, BaseController, Controller, Get, Post } from '..';
+import { BaseController, Controller, Post } from '..';
 import { API_VERSION } from '@/config/version.config';
 import { validate } from '@/middlewares/validateMiddleware';
+import AuthService from '@/services/auth/auth.service';
 
 /**
  * @swagger
@@ -16,6 +16,9 @@ import { validate } from '@/middlewares/validateMiddleware';
  */
 @Controller(API_VERSION, '/auth')
 export default class AuthController extends BaseController {
+  constructor(protected authService: AuthService) {
+    super();
+  }
   /**
    * @swagger
    * /auth/login:
@@ -46,7 +49,7 @@ export default class AuthController extends BaseController {
   public async login(request: Request<{}, TAuthSchema>, response: Response, next: NextFunction) {
     try {
       const authRequest = request.body;
-      const user = await loginUser(authRequest.email);
+      const user = await this.authService.loginUser(authRequest.email);
 
       if (!user) {
         sendUnauthorizedResponse(response, 'Credentials Error');
@@ -58,7 +61,7 @@ export default class AuthController extends BaseController {
       if (isValidPassword) {
         const token = generateAccessToken(user.id);
         const refreshToken = generateRefreshToken();
-        await createRefreshToken(refreshToken, user.id);
+        await this.authService.createRefreshToken(refreshToken, user.id);
 
         const accessToken = {
           token: token,
@@ -110,7 +113,8 @@ export default class AuthController extends BaseController {
   public async refresh(request: Request, response: Response, next: NextFunction) {
     try {
       const { refreshToken } = request.body;
-      const { accessToken, refreshToken: newRefreshToken } = await refreshTokens(refreshToken);
+      const { accessToken, refreshToken: newRefreshToken } =
+        await this.authService.refreshTokens(refreshToken);
       response.json({ accessToken, refreshToken: newRefreshToken });
     } catch (err) {
       next(err);

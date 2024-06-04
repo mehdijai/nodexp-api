@@ -1,25 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import {
-  _Controller,
-  AuthGuard,
-  BaseController,
-  Controller,
-  Delete,
-  Get,
-  Patch,
-  Post,
-  Put,
-} from '..';
+import { AuthGuard, BaseController, Controller, Delete, Get, Patch, Post, Put } from '..';
 import { API_VERSION } from '@/config/version.config';
-import {
-  createCustomer,
-  deleteCustomer,
-  getCustomer,
-  getCustomers,
-  removeCustomer,
-  restoreCustomer,
-  updateCustomer,
-} from '@/services/customer.service';
 import {
   TCreateCustomerSchema,
   TFilterCustomerSchema,
@@ -27,6 +8,7 @@ import {
 } from '@/validations/crm/customer';
 import { AuthenticatedRequest } from '@/types/auth.types';
 import { sendNotFoundResponse } from '@/utils/responseHandler';
+import CustomerService from '@/services/CRM/customer.service';
 
 /**
  * @swagger
@@ -277,6 +259,9 @@ import { sendNotFoundResponse } from '@/utils/responseHandler';
  */
 @Controller(API_VERSION, '/customers')
 export default class CustomerController extends BaseController {
+  constructor(protected customerService: CustomerService) {
+    super();
+  }
   /**
    * @swagger
    * /customers:
@@ -309,7 +294,7 @@ export default class CustomerController extends BaseController {
     next: NextFunction
   ) {
     try {
-      const customers = await getCustomers(req.query);
+      const customers = await this.customerService.getCustomers(req.query);
       response.json(customers);
     } catch (err) {
       next(err);
@@ -347,7 +332,7 @@ export default class CustomerController extends BaseController {
     next: NextFunction
   ) {
     try {
-      const customers = await getCustomers(req.query, true);
+      const customers = await this.customerService.getCustomers(req.query, true);
       response.json(customers);
     } catch (err) {
       next(err);
@@ -379,7 +364,7 @@ export default class CustomerController extends BaseController {
     try {
       const user = req.user;
       const body: TCreateCustomerSchema = req.body;
-      const customer = await createCustomer(user.userId, body);
+      const customer = await this.customerService.createCustomer(user.userId, body);
       response.json(customer);
     } catch (err) {
       next(err);
@@ -413,7 +398,7 @@ export default class CustomerController extends BaseController {
     next: NextFunction
   ) {
     try {
-      const customer = await updateCustomer(req.body);
+      const customer = await this.customerService.updateCustomer(req.body);
       if (!customer) {
         sendNotFoundResponse(response, 'Customer not found');
       } else {
@@ -457,7 +442,7 @@ export default class CustomerController extends BaseController {
     next: NextFunction
   ) {
     try {
-      const customer = await removeCustomer(req.body.id);
+      const customer = await this.customerService.removeCustomer(req.body.id);
       if (!customer) {
         sendNotFoundResponse(response, 'Customer not found');
       } else {
@@ -501,7 +486,7 @@ export default class CustomerController extends BaseController {
     next: NextFunction
   ) {
     try {
-      const customer = await restoreCustomer(req.body.id);
+      const customer = await this.customerService.restoreCustomer(req.body.id);
       if (!customer) {
         sendNotFoundResponse(response, 'Customer not found');
       } else {
@@ -545,7 +530,7 @@ export default class CustomerController extends BaseController {
     next: NextFunction
   ) {
     try {
-      const customer = await deleteCustomer(req.body.id);
+      const customer = await this.customerService.deleteCustomer(req.body.id);
       if (!customer) {
         sendNotFoundResponse(response, 'Customer not found');
       } else {
@@ -580,7 +565,7 @@ export default class CustomerController extends BaseController {
   @Get('/:id')
   public async getCustomer(req: Request<{ id: string }>, response: Response, next: NextFunction) {
     try {
-      const customer = await getCustomer(req.params.id);
+      const customer = await this.customerService.getCustomer(req.params.id);
       if (!customer) {
         sendNotFoundResponse(response, 'Customer not found');
       } else {
