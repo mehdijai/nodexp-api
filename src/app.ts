@@ -1,7 +1,6 @@
 import path from 'path';
 import express, { Express } from 'express';
 import bodyParser from 'body-parser';
-import { errorHandler } from './middlewares/errorHandlerMiddleware';
 import { notFoundHandler } from './middlewares/notFoundHandler';
 import setupSwagger from './config/swagger.config';
 import { config } from 'dotenv';

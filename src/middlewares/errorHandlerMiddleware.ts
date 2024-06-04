@@ -24,7 +24,7 @@ export async function errorHandler(error: any, _: Request, response: Response) {
         ? { error: 'Prisma Error occurred', details: error }
         : { error: 'Error occurred' };
 
-    return ResponseHandler.setResponse(response).BadRequest(response);
+    return ResponseHandler.setResponse(response).BadRequest(res);
   }
 
   // Handle Json Web Token Error
@@ -34,7 +34,7 @@ export async function errorHandler(error: any, _: Request, response: Response) {
         ? { error: 'Json Web Token Error occurred', message: error }
         : { error: 'Error occurred' };
     return ResponseHandler.setResponse(response).response(
-      response,
+      res,
       HttpStatusCode.INTERNAL_SERVER_ERROR
     );
   }
@@ -45,7 +45,7 @@ export async function errorHandler(error: any, _: Request, response: Response) {
       ? { message: error.message }
       : { message: 'Internal Server Error' };
   return ResponseHandler.setResponse(response).response(
-    response,
+    res,
     HttpStatusCode.INTERNAL_SERVER_ERROR
   );
 }

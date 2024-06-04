@@ -2,11 +2,6 @@ import { join } from 'path';
 import { Express } from 'express';
 import 'reflect-metadata';
 
-interface Controller {
-  registerRoutes(app: Express): void;
-  new (...args: any[]): void;
-}
-
 function scanForControllers(app: Express) {
   const fs = require('fs'); // Require fs module (assuming Node.js environment)
 
