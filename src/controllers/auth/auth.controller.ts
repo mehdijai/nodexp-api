@@ -1,50 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import { authSchema, refreshTokenSchema, TAuthSchema } from '@/validations/auth';
 import { generateAccessToken, generateRefreshToken } from '@/utils/jwtHandler';
-import { BaseController, Controller, Post } from '..';
+import { BaseController, Controller, Post, RequestBody, Responses } from '..';
 import { API_VERSION } from '@/config/version.config';
 import { validate } from '@/middlewares/validateMiddleware';
 import AuthService from '@/services/auth/auth.service';
 import bcrypt from 'bcryptjs';
 import { apiResponse, ResponseHandler } from '@/utils/responseHandler';
-/**
- * @swagger
- * tags:
- *   name: Auth
- *   description: Authentication endpoints
- */
+
 @Controller('Auth', API_VERSION, '/auth')
 export default class AuthController extends BaseController {
   constructor(protected authService: AuthService) {
     super();
   }
-  /**
-   * @swagger
-   * /auth/login:
-   *   post:
-   *     summary: Login a user
-   *     tags: [Auth]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - username
-   *               - password
-   *             properties:
-   *               username:
-   *                 type: string
-   *               password:
-   *                 type: string
-   *     responses:
-   *       200:
-   *         description: User logged in successfully
-   *       401:
-   *         description: Invalid credentials
-   */
-  @Post('/login', [validate(authSchema)])
+
+  @Responses({ '200': 'User logged in successfully' })
+  @RequestBody(authSchema)
+  @Post('/login', [validate(authSchema)], 'Login a user')
   public async login(request: Request<{}, TAuthSchema>, response: Response, next: NextFunction) {
     try {
       const authRequest = request.body;
@@ -97,19 +69,9 @@ export default class AuthController extends BaseController {
     }
   }
 
-  /**
-   * @swagger
-   * /auth/refresh:
-   *   post:
-   *     summary: Refresh the access token
-   *     tags: [Auth]
-   *     responses:
-   *       200:
-   *         description: Token refreshed successfully
-   *       401:
-   *         description: Invalid refresh token
-   */
-  @Post('/refresh', [validate(refreshTokenSchema)])
+  @Responses({ '201': 'Token refreshed successfully' })
+  @RequestBody(authSchema)
+  @Post('/refresh', [validate(refreshTokenSchema)], 'Refresh the access token')
   public async refresh(request: Request, response: Response, next: NextFunction) {
     try {
       const { refreshToken } = request.body;

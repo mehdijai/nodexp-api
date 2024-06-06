@@ -16,10 +16,29 @@
   "paths": {
     "/api/v1/auth/login": {
       "post": {
+        "summary": "Login a user",
         "operationId": "/api/v1/login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "-"
+            "description": "User logged in successfully"
           }
         },
         "security": [],
@@ -30,10 +49,29 @@
     },
     "/api/v1/auth/refresh": {
       "post": {
+        "summary": "Refresh the access token",
         "operationId": "/api/v1/refresh",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {
-            "description": "-"
+          "201": {
+            "description": "Token refreshed successfully"
           }
         },
         "security": [],
@@ -44,10 +82,26 @@
     },
     "/api/v1/customers/": {
       "patch": {
+        "summary": "Restore customer",
         "operationId": "/api/v1/restoreCustomer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "-"
+            "description": "Restored Customer"
           },
           "401": {
             "description": "Unauthorized"
@@ -63,10 +117,26 @@
         ]
       },
       "delete": {
+        "summary": "Remove customer",
         "operationId": "/api/v1/removeCustomer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "-"
+            "description": "Removed Customer"
           },
           "401": {
             "description": "Unauthorized"
@@ -82,10 +152,62 @@
         ]
       },
       "put": {
+        "summary": "Update customer",
         "operationId": "/api/v1/updateCustomer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "gender": {
+                    "type": "string"
+                  },
+                  "firstname": {
+                    "type": "string"
+                  },
+                  "lastname": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "adresse": {
+                    "type": "string"
+                  },
+                  "zipCode": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string"
+                  },
+                  "companyId": {
+                    "type": "string"
+                  },
+                  "statut": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "-"
+            "description": "Updated Customer"
           },
           "401": {
             "description": "Unauthorized"
@@ -103,6 +225,54 @@
       "post": {
         "summary": "Create customer",
         "operationId": "/api/v1/createCustomer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "gender": {
+                    "type": "string"
+                  },
+                  "firstname": {
+                    "type": "string"
+                  },
+                  "lastname": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "adresse": {
+                    "type": "string"
+                  },
+                  "zipCode": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string"
+                  },
+                  "companyId": {
+                    "type": "string"
+                  },
+                  "statut": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "Created Customer"
@@ -329,10 +499,26 @@
     },
     "/api/v1/customers/hard": {
       "delete": {
+        "summary": "Hard delete customer",
         "operationId": "/api/v1/deleteCustomer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "-"
+            "description": "Deleted Customer"
           },
           "401": {
             "description": "Unauthorized"
@@ -350,6 +536,7 @@
     },
     "/api/v1/customers/{id}": {
       "get": {
+        "summary": "Get one customer",
         "operationId": "/api/v1/getCustomer",
         "parameters": [
           {
@@ -366,7 +553,7 @@
         ],
         "responses": {
           "200": {
-            "description": "-"
+            "description": "Customer object"
           },
           "401": {
             "description": "Unauthorized"

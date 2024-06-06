@@ -11,24 +11,22 @@ import {
   Put,
   Param,
   Responses,
+  RequestBody,
 } from '..';
 import { API_VERSION } from '@/config/version.config';
 import {
+  createCustomerSchema,
   filterCustomerSchema,
   TCreateCustomerSchema,
   TFilterCustomerSchema,
   TUpdateCustomerSchema,
+  updateCustomerSchema,
 } from '@/validations/crm/customer';
 import { AuthenticatedRequest } from '@/types/auth.types';
 import { apiResponse, ResponseHandler } from '@/utils/responseHandler';
 import CustomerService from '@/services/CRM/customer.service';
+import { idBodySchema, TIdBodySchema } from '@/validations';
 
-/**
- * @swagger
- * tags:
- *   name: Customer
- *   description: Customer endpoints
- */
 @Controller('Customer', API_VERSION, '/customers')
 export default class CustomerController extends BaseController {
   constructor(protected customerService: CustomerService) {
@@ -68,29 +66,11 @@ export default class CustomerController extends BaseController {
       next(err);
     }
   }
-  /**
-   * @swagger
-   * /customers:
-   *   post:
-   *     summary: Create customer
-   *     tags: [Customer]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/CreateCustomer'
-   *     responses:
-   *       201:
-   *         description: Created Customer
-   *       401:
-   *         description: Unauthorized
-   *     security:
-   *       - bearerAuth: []
-   */
+
   @AuthGuard()
   @Responses({ '201': 'Created Customer' })
-  @Post('/', [], "Create customer")
+  @RequestBody(createCustomerSchema)
+  @Post('/', [], 'Create customer')
   public async createCustomer(req: AuthenticatedRequest, response: Response, next: NextFunction) {
     try {
       const user = req.user;
@@ -101,28 +81,11 @@ export default class CustomerController extends BaseController {
       next(err);
     }
   }
-  /**
-   * @swagger
-   * /customers:
-   *   put:
-   *     summary: Update customer
-   *     tags: [Customer]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/UpdateCustomer'
-   *     responses:
-   *       200:
-   *         description: Updated Customer
-   *       401:
-   *         description: Unauthorized
-   *     security:
-   *       - bearerAuth: []
-   */
+
   @AuthGuard()
-  @Put('/')
+  @Responses({ '200': 'Updated Customer' })
+  @RequestBody(updateCustomerSchema)
+  @Put('/', [], 'Update customer')
   public async updateCustomer(
     req: Request<{}, TUpdateCustomerSchema>,
     response: Response,
@@ -139,30 +102,13 @@ export default class CustomerController extends BaseController {
       next(err);
     }
   }
-  /**
-   * @swagger
-   * /customers:
-   *   delete:
-   *     summary: Remove customer
-   *     tags: [Customer]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/IdBody'
-   *     responses:
-   *       200:
-   *         description: Removed Customer
-   *       401:
-   *         description: Unauthorized
-   *     security:
-   *       - bearerAuth: []
-   */
+
   @AuthGuard()
-  @Delete('/')
+  @Responses({ '200': 'Removed Customer' })
+  @RequestBody(idBodySchema)
+  @Delete('/', [], 'Remove customer')
   public async removeCustomer(
-    req: Request<{}, { id: string }>,
+    req: Request<{}, TIdBodySchema>,
     response: Response,
     next: NextFunction
   ) {
@@ -177,30 +123,13 @@ export default class CustomerController extends BaseController {
       next(err);
     }
   }
-  /**
-   * @swagger
-   * /customers:
-   *   patch:
-   *     summary: Restore removed customer
-   *     tags: [Customer]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/IdBody'
-   *     responses:
-   *       200:
-   *         description: Restored Customer
-   *       401:
-   *         description: Unauthorized
-   *     security:
-   *       - bearerAuth: []
-   */
+
   @AuthGuard()
-  @Patch('/')
+  @Responses({ '200': 'Restored Customer' })
+  @RequestBody(idBodySchema)
+  @Patch('/', [], 'Restore customer')
   public async restoreCustomer(
-    req: Request<{}, { id: string }>,
+    req: Request<{}, TIdBodySchema>,
     response: Response,
     next: NextFunction
   ) {
@@ -215,30 +144,13 @@ export default class CustomerController extends BaseController {
       next(err);
     }
   }
-  /**
-   * @swagger
-   * /customers/hard:
-   *   delete:
-   *     summary: Hard delete customer
-   *     tags: [Customer]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/IdBody'
-   *     responses:
-   *       200:
-   *         description: Deleted Customer
-   *       401:
-   *         description: Unauthorized
-   *     security:
-   *       - bearerAuth: []
-   */
+
   @AuthGuard()
-  @Delete('/hard')
+  @Responses({ '200': 'Deleted Customer' })
+  @RequestBody(idBodySchema)
+  @Delete('/hard', [], 'Hard delete customer')
   public async deleteCustomer(
-    req: Request<{}, { id: string }>,
+    req: Request<{}, TIdBodySchema>,
     response: Response,
     next: NextFunction
   ) {
@@ -253,25 +165,11 @@ export default class CustomerController extends BaseController {
       next(err);
     }
   }
-  /**
-   * @swagger
-   * /customers/{id}:
-   *   get:
-   *     summary: Get customer
-   *     tags: [Customer]
-   *     parameters:
-   *        - $ref: '#/components/parameters/id'
-   *     responses:
-   *       200:
-   *         description: Customer
-   *       401:
-   *         description: Unauthorized
-   *     security:
-   *       - bearerAuth: []
-   */
+
   @AuthGuard()
+  @Responses({ '200': 'Customer object' })
   @Param([{ name: 'id', type: 'string' }])
-  @Get('/:id')
+  @Get('/:id', [], 'Get one customer')
   public async getCustomer(req: Request<{ id: string }>, response: Response, next: NextFunction) {
     try {
       const customer = await this.customerService.getCustomer(req.params.id);

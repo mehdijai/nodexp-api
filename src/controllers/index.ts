@@ -4,11 +4,12 @@ import { authenticateJWT } from '@/middlewares/authMiddleware';
 import MetadataService from '@/services/Metadata.service';
 import { OpenAPIDocInstance } from '@/utils/openApiGenerator';
 import { ZodObject, ZodRawShape } from 'zod';
-import { parseZodObject } from '@/utils/zodOpenApiParser';
+import { parseZodObject, parseZodObjectRequest } from '@/utils/zodOpenApiParser';
 import {
   ParameterObject,
   PathItemObject,
   ReferenceObject,
+  RequestBodyObject,
   ResponsesObject,
 } from '@/types/openapi.type';
 
@@ -19,6 +20,7 @@ interface Route {
   description?: string;
   middlewares: RequestHandler[];
   params?: (ParameterObject | ReferenceObject)[];
+  requestBody?: RequestBodyObject;
   method: 'get' | 'post' | 'patch' | 'put' | 'delete';
   responses?: Record<string, string>;
 }
@@ -103,6 +105,36 @@ export function Query<T extends ZodRawShape>(obj: ZodObject<T>) {
           match.params = [];
         }
         match.params.push(param);
+      });
+    }
+    MetadataService.set('routes', existingRoutes);
+  };
+}
+
+export function RequestBody<T extends ZodRawShape>(obj: ZodObject<T>) {
+  return function (_: Object, propertyKey: string) {
+    const existingRoutes: Route[] = MetadataService.get('routes') || [];
+    const match = existingRoutes.find((route) => route.methodName === propertyKey);
+
+    const val: RequestBodyObject = {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {},
+          },
+        },
+      },
+    };
+
+    if (match) {
+      const typeEntries = Object.entries(obj.shape);
+      typeEntries.forEach((item) => {
+        const requestBody = parseZodObjectRequest(item[1]);
+        // @ts-ignore
+        val.content['application/json'].schema.properties[item[0]] = requestBody;
+        match.requestBody = val;
       });
     }
     MetadataService.set('routes', existingRoutes);
@@ -210,6 +242,7 @@ export class BaseController {
           summary: route.summary,
           operationId: `${version}/${route.methodName}`,
           parameters: route.params,
+          requestBody: route.requestBody,
           responses: parseResponses(route.responses, route.middlewares.includes(authenticateJWT)),
           security: route.middlewares.includes(authenticateJWT) ? [{ bearerAuth: [] }] : [],
           tags: [tag],
