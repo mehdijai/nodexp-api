@@ -1,12 +1,26 @@
+import 'reflect-metadata';
 import { Router, Express, RequestHandler } from 'express';
 import { authenticateJWT } from '@/middlewares/authMiddleware';
 import MetadataService from '@/services/Metadata.service';
+import { OpenAPIDocInstance } from '@/utils/openApiGenerator';
+import { ZodObject, ZodRawShape } from 'zod';
+import { parseZodObject } from '@/utils/zodOpenApiParser';
+import {
+  ParameterObject,
+  PathItemObject,
+  ReferenceObject,
+  ResponsesObject,
+} from '@/types/openapi.type';
 
 interface Route {
   path: string;
   methodName: string;
+  summary?: string;
+  description?: string;
   middlewares: RequestHandler[];
+  params?: (ParameterObject | ReferenceObject)[];
   method: 'get' | 'post' | 'patch' | 'put' | 'delete';
+  responses?: Record<string, string>;
 }
 
 function HTTPMethodDecorator(route: Route) {
@@ -21,33 +35,33 @@ function HTTPMethodDecorator(route: Route) {
 }
 
 // Decorator for defining Express GET routes
-export function Get(path: string, middlewares: RequestHandler[] = []) {
+export function Get(path: string, middlewares: RequestHandler[] = [], summary?: string) {
   return function (_: Object, propertyKey: string) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'get', middlewares });
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'get', middlewares, summary });
   };
 }
 // Decorator for defining Express GET routes
-export function Post(path: string, middlewares: RequestHandler[] = []) {
+export function Post(path: string, middlewares: RequestHandler[] = [], summary?: string) {
   return function (_: Object, propertyKey: string) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'post', middlewares });
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'post', middlewares, summary });
   };
 }
 // Decorator for defining Express GET routes
-export function Patch(path: string, middlewares: RequestHandler[] = []) {
+export function Patch(path: string, middlewares: RequestHandler[] = [], summary?: string) {
   return function (_: Object, propertyKey: string) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'patch', middlewares });
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'patch', middlewares, summary });
   };
 }
 // Decorator for defining Express GET routes
-export function Put(path: string, middlewares: RequestHandler[] = []) {
+export function Put(path: string, middlewares: RequestHandler[] = [], summary?: string) {
   return function (_: Object, propertyKey: string) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'put', middlewares });
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'put', middlewares, summary });
   };
 }
 // Decorator for defining Express GET routes
-export function Delete(path: string, middlewares: RequestHandler[] = []) {
+export function Delete(path: string, middlewares: RequestHandler[] = [], summary?: string) {
   return function (_: Object, propertyKey: string) {
-    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'delete', middlewares });
+    HTTPMethodDecorator({ path, methodName: propertyKey, method: 'delete', middlewares, summary });
   };
 }
 // Decorator for defining Express GET routes
@@ -63,21 +77,125 @@ export function AuthGuard() {
   };
 }
 
-export function Controller(version?: string, prefix?: string) {
-  return function (_: Function) {
-    MetadataService.set('prefix', prefix ?? '');
-    MetadataService.set('version', version ?? '');
+export function Controller(name: string, version?: string, prefix?: string, description?: string) {
+  return function (target: Function) {
+    Reflect.defineMetadata('prefix', prefix ?? '', target);
+    Reflect.defineMetadata('version', version ?? '', target);
+    Reflect.defineMetadata('tag', name ?? '', target);
+    const instance = OpenAPIDocInstance.getInstance();
+    instance.addTag({
+      name,
+      description,
+    });
   };
 }
 
+export function Query<T extends ZodRawShape>(obj: ZodObject<T>) {
+  return function (_: Object, propertyKey: string) {
+    const existingRoutes: Route[] = MetadataService.get('routes') || [];
+    const match = existingRoutes.find((route) => route.methodName === propertyKey);
+
+    if (match) {
+      const typeEntries = Object.entries(obj.shape);
+      typeEntries.forEach((item) => {
+        const param = parseZodObject('query', item[0], item[1]);
+        if (!match.params) {
+          match.params = [];
+        }
+        match.params.push(param);
+      });
+    }
+    MetadataService.set('routes', existingRoutes);
+  };
+}
+
+export function Param(value: { name: string; type: string; description?: string }[]) {
+  return function (_: Object, propertyKey: string) {
+    const existingRoutes: Route[] = MetadataService.get('routes') || [];
+    const match = existingRoutes.find((route) => route.methodName === propertyKey);
+
+    if (match) {
+      value.forEach((item) => {
+        const param = {
+          name: item.name,
+          in: 'path',
+          description: item.description,
+          required: true,
+          allowEmptyValue: false,
+          schema: {
+            title: item.name,
+            type: item.type,
+            format: 'uuid',
+          },
+        };
+        if (!match.params) {
+          match.params = [];
+        }
+        match.params.push(param);
+      });
+    }
+    MetadataService.set('routes', existingRoutes);
+  };
+}
+export function Responses(value: Record<string, string>) {
+  return function (_: Object, propertyKey: string) {
+    const existingRoutes: Route[] = MetadataService.get('routes') || [];
+    const match = existingRoutes.find((route) => route.methodName === propertyKey);
+
+    if (match) {
+      match.responses = value;
+    }
+    MetadataService.set('routes', existingRoutes);
+  };
+}
+
+function parseDynamicRoute(path: string) {
+  if (!path.includes(':')) return path;
+  const dynamicParts = path.split('/');
+  const newPath = [];
+  for (let index = 0; index < dynamicParts.length; index++) {
+    let part = dynamicParts[index];
+    if (part.includes(':')) {
+      part = `{${part.replace(/:/g, '')}}`;
+    }
+    newPath.push(part);
+  }
+
+  return newPath.join('/');
+}
+
+function parseResponses(responses?: Record<string, string>, hasAuth = false): ResponsesObject {
+  const result: ResponsesObject = {};
+  if (hasAuth) {
+    result['401'] = {
+      description: 'Unauthorized',
+    };
+  }
+  if (!responses) {
+    result['200'] = {
+      description: '-',
+    };
+    return result;
+  }
+
+  Object.keys(responses).forEach((key) => {
+    result[key] = {
+      description: responses[key],
+    };
+  });
+
+  return result;
+}
 // Base Controller class
 export class BaseController {
   private router = Router();
   public _registerRoutes(app: Express, controllerClass: any) {
     // Get routes defined on the class
-    const routes = MetadataService.get('routes');
-    const prefix = MetadataService.get('prefix') || '';
-    const version = MetadataService.get('version') || '';
+    const routes: Route[] = MetadataService.get('routes') || [];
+
+    const prefix = Reflect.getMetadata('prefix', controllerClass.constructor) || '';
+    const tag = Reflect.getMetadata('tag', controllerClass.constructor) || '';
+    const version = Reflect.getMetadata('version', controllerClass.constructor) || '';
 
     // console.log(routes);
 
@@ -86,6 +204,22 @@ export class BaseController {
     // Loop through routes and register them with Express
     routes.forEach((route: Route) => {
       if (route.methodName in controllerClass) {
+        const instance = OpenAPIDocInstance.getInstance();
+        const pathElement: PathItemObject = {};
+        pathElement[route.method] = {
+          summary: route.summary,
+          operationId: `${version}/${route.methodName}`,
+          parameters: route.params,
+          responses: parseResponses(route.responses, route.middlewares.includes(authenticateJWT)),
+          security: route.middlewares.includes(authenticateJWT) ? [{ bearerAuth: [] }] : [],
+          tags: [tag],
+        };
+        // if (route.middlewares.includes(authenticateJWT)) {
+        //   // @ts-ignore
+        //   pathElement[route.method].responses['401'] = { description: 'Unauthorized ' };
+        // }
+        const swaggerPath = parseDynamicRoute(version + prefix + route.path);
+        instance.addPath(swaggerPath, pathElement);
         const handler: Function = controllerClass[route.methodName as keyof typeof controllerClass];
         this.router[route.method](route.path, ...route.middlewares, handler.bind(controllerClass));
       }

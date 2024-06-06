@@ -33,8 +33,8 @@ export const updateCustomerSchema = z.object({
 });
 
 export const filterCustomerSchema = z.object({
-  query: z.string().optional(),
-  take: z.number().optional(),
+  query: z.string().max(50).describe("test").optional(),
+  take: z.number().max(20).min(0).optional(),
   skip: z.number().optional(),
   type: z.nativeEnum(CustomerType).optional(),
   gender: z.nativeEnum(Genders).optional(),

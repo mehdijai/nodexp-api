@@ -12,7 +12,7 @@ function scanForControllers(app: Express) {
       const stat = fs.statSync(filePath);
       if (stat.isDirectory()) {
         walkDir(filePath); // Recursively walk through subdirectories
-      } else if (file.endsWith('.controller.ts')) {
+      } else if (file.endsWith('.controller.ts') && !file.startsWith('_schema.')) {
         // Check for “.controller.ts” files
         try {
           const controller = require(filePath).default; // Require the controller module

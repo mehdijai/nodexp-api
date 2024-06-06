@@ -13,7 +13,7 @@ import { apiResponse, ResponseHandler } from '@/utils/responseHandler';
  *   name: Auth
  *   description: Authentication endpoints
  */
-@Controller(API_VERSION, '/auth')
+@Controller('Auth', API_VERSION, '/auth')
 export default class AuthController extends BaseController {
   constructor(protected authService: AuthService) {
     super();

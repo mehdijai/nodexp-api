@@ -10,14 +10,15 @@ import helmet from 'helmet';
 import xss from 'x-xss-protection';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
+import { OpenAPIDocInstance } from './utils/openApiGenerator';
 config();
 
 export class App {
   app: Express;
   constructor() {
     this.app = express();
+    OpenAPIDocInstance.getInstance();
     this.initMiddlewares();
-    this.setupSwagger();
     this.setupControllers();
     this.setupRouter();
   }
@@ -61,13 +62,9 @@ export class App {
     this.app.use(limiter);
   }
 
-  private setupSwagger() {
-    // Swagger Setup
-    setupSwagger(this.app);
-  }
-
   private setupControllers() {
     scanForControllers(this.app);
+    setupSwagger(this.app);
   }
   private setupRouter() {
     // Routes Handling
