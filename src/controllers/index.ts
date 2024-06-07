@@ -14,6 +14,7 @@ import {
 } from '@/types/openapi.type';
 import { PoliciesVerbs } from '@/services/policies.service';
 import { authorization } from '@/middlewares/authorization';
+import { API_PREFIX } from '@/config/version.config';
 
 interface Route {
   path: string;
@@ -266,13 +267,13 @@ export class BaseController {
         //   // @ts-ignore
         //   pathElement[route.method].responses['401'] = { description: 'Unauthorized ' };
         // }
-        const swaggerPath = parseDynamicRoute(version + prefix + route.path);
+        const swaggerPath = parseDynamicRoute(API_PREFIX + "/" + version + prefix + route.path);
         instance.addPath(swaggerPath, pathElement);
         const handler: Function = controllerClass[route.methodName as keyof typeof controllerClass];
         this.router[route.method](route.path, ...route.middlewares, handler.bind(controllerClass));
       }
     });
 
-    app.use(version + prefix, this.router);
+    app.use(API_PREFIX + "/" + version + prefix, this.router);
   }
 }

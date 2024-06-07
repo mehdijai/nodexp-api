@@ -2,13 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 import { authSchema, refreshTokenSchema, TAuthSchema } from '@/validations/auth';
 import { generateAccessToken, generateRefreshToken } from '@/utils/jwtHandler';
 import { BaseController, Controller, Post, RequestBody, Responses } from '..';
-import { API_VERSION } from '@/config/version.config';
 import { validate } from '@/middlewares/validateMiddleware';
 import AuthService from '@/services/auth/auth.service';
 import bcrypt from 'bcryptjs';
 import { apiResponse, ResponseHandler } from '@/utils/responseHandler';
 
-@Controller('Auth', API_VERSION, '/auth')
+@Controller('Auth', 'v1', '/auth')
 export default class AuthController extends BaseController {
   constructor(protected authService: AuthService) {
     super();

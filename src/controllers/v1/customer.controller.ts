@@ -14,7 +14,6 @@ import {
   RequestBody,
   Can,
 } from '..';
-import { API_VERSION } from '@/config/version.config';
 import {
   createCustomerSchema,
   filterCustomerSchema,
@@ -29,7 +28,7 @@ import CustomerService from '@/services/CRM/customer.service';
 import { idBodySchema, TIdBodySchema } from '@/validations';
 import { PoliciesVerbs } from '@/services/policies.service';
 
-@Controller('Customer', API_VERSION, '/customers')
+@Controller('Customer', 'v1', '/customers')
 export default class CustomerController extends BaseController {
   constructor(protected customerService: CustomerService) {
     super();
