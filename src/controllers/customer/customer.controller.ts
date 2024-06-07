@@ -12,6 +12,7 @@ import {
   Param,
   Responses,
   RequestBody,
+  Can,
 } from '..';
 import { API_VERSION } from '@/config/version.config';
 import {
@@ -26,6 +27,7 @@ import { AuthenticatedRequest } from '@/types/auth.types';
 import { apiResponse, ResponseHandler } from '@/utils/responseHandler';
 import CustomerService from '@/services/CRM/customer.service';
 import { idBodySchema, TIdBodySchema } from '@/validations';
+import { PoliciesVerbs } from '@/services/policies.service';
 
 @Controller('Customer', API_VERSION, '/customers')
 export default class CustomerController extends BaseController {
@@ -34,6 +36,7 @@ export default class CustomerController extends BaseController {
   }
 
   @AuthGuard()
+  @Can('customer', PoliciesVerbs.READ)
   @Responses({ '200': 'List of customers' })
   @Query(filterCustomerSchema)
   @Get('/', [], 'Get customers')
@@ -51,6 +54,7 @@ export default class CustomerController extends BaseController {
   }
 
   @AuthGuard()
+  @Can('customer', PoliciesVerbs.READ_ARCHIVED)
   @Responses({ '200': 'List of archived customers' })
   @Query(filterCustomerSchema)
   @Get('/archived', [], 'Get archived customers')
@@ -68,6 +72,7 @@ export default class CustomerController extends BaseController {
   }
 
   @AuthGuard()
+  @Can('customer', PoliciesVerbs.CREATE)
   @Responses({ '201': 'Created Customer' })
   @RequestBody(createCustomerSchema)
   @Post('/', [], 'Create customer')
@@ -83,6 +88,7 @@ export default class CustomerController extends BaseController {
   }
 
   @AuthGuard()
+  @Can('customer', PoliciesVerbs.UPDATE)
   @Responses({ '200': 'Updated Customer' })
   @RequestBody(updateCustomerSchema)
   @Put('/', [], 'Update customer')
@@ -104,6 +110,7 @@ export default class CustomerController extends BaseController {
   }
 
   @AuthGuard()
+  @Can('customer', PoliciesVerbs.REMOVE)
   @Responses({ '200': 'Removed Customer' })
   @RequestBody(idBodySchema)
   @Delete('/', [], 'Remove customer')
@@ -125,6 +132,7 @@ export default class CustomerController extends BaseController {
   }
 
   @AuthGuard()
+  @Can('customer', PoliciesVerbs.RESTORE)
   @Responses({ '200': 'Restored Customer' })
   @RequestBody(idBodySchema)
   @Patch('/', [], 'Restore customer')
@@ -146,6 +154,7 @@ export default class CustomerController extends BaseController {
   }
 
   @AuthGuard()
+  @Can('customer', PoliciesVerbs.DELETE)
   @Responses({ '200': 'Deleted Customer' })
   @RequestBody(idBodySchema)
   @Delete('/hard', [], 'Hard delete customer')
@@ -167,6 +176,7 @@ export default class CustomerController extends BaseController {
   }
 
   @AuthGuard()
+  @Can('customer', PoliciesVerbs.READ)
   @Responses({ '200': 'Customer object' })
   @Param([{ name: 'id', type: 'string' }])
   @Get('/:id', [], 'Get one customer')

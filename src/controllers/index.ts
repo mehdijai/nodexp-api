@@ -12,6 +12,8 @@ import {
   RequestBodyObject,
   ResponsesObject,
 } from '@/types/openapi.type';
+import { PoliciesVerbs } from '@/services/policies.service';
+import { authorization } from '@/middlewares/authorization';
 
 interface Route {
   path: string;
@@ -73,7 +75,19 @@ export function AuthGuard() {
     const match = existingRoutes.find((route) => route.methodName === propertyKey);
 
     if (match) {
-      match.middlewares.push(authenticateJWT);
+      match.middlewares.unshift(authenticateJWT);
+    }
+    MetadataService.set('routes', existingRoutes);
+  };
+}
+
+export function Can(model: string, verb: PoliciesVerbs) {
+  return function (_: Object, propertyKey: string) {
+    const existingRoutes: Route[] = MetadataService.get('routes') || [];
+    const match = existingRoutes.find((route) => route.methodName === propertyKey);
+
+    if (match) {
+      match.middlewares.push(authorization(model, verb));
     }
     MetadataService.set('routes', existingRoutes);
   };
@@ -218,6 +232,7 @@ function parseResponses(responses?: Record<string, string>, hasAuth = false): Re
 
   return result;
 }
+
 // Base Controller class
 export class BaseController {
   private router = Router();

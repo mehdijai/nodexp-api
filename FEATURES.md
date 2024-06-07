@@ -1,3 +1,3 @@
 - [x] JWT Auth Guard decorator
-- [ ] Policies and authorizations middleware decorator
+- [x] Policies and authorizations middleware decorator
 - [x] Unified Response Object

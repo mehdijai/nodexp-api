@@ -1,34 +1,18 @@
 import { PrismaClient } from '@prisma/client';
+import { Policies } from '../../src/services/policies.service';
 
 export async function roleAndPermissionsSeeder(prisma: PrismaClient) {
   const adminRole = await prisma.role.create({
     data: { name: 'administrator' },
   });
 
-  const abilities = ['read', 'write', 'create', 'edit', 'validate'];
+  await Policies.createAllPolicy('user', [adminRole.id]);
 
-  const adminPermissionsData = abilities.flatMap((ability) => [
-    { name: `${ability}_user`, roleId: adminRole.id },
-  ]);
-
-  for (const permission of adminPermissionsData) {
-    await prisma.permission.create({
-      data: permission,
-    });
-  }
   const crmManagerRole = await prisma.role.create({
     data: { name: 'crm-manager' },
   });
 
-  const crmAdminPermissionsData = abilities.flatMap((ability) => [
-    { name: `${ability}_customer`, roleId: crmManagerRole.id },
-  ]);
-
-  for (const permission of crmAdminPermissionsData) {
-    await prisma.permission.create({
-      data: permission,
-    });
-  }
+  await Policies.createAllPolicy('customer', [adminRole.id, crmManagerRole.id]);
 
   return adminRole.id;
 }

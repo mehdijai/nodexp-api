@@ -6,7 +6,7 @@ import { ResponseHandler } from '@/utils/responseHandler';
 const SECRET_KEY = process.env.JWT_SECRET_KEY || 'your_secret_key';
 
 export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization;  
 
   if (authHeader) {
     const token = authHeader.split(' ')[1];
