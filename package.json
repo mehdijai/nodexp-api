@@ -1,5 +1,5 @@
 {
-    "name": "api.operifysuite",
+    "name": "nodexp",
     "version": "1.0.0",
     "description": "expressjs typescript boilerplate with prisma",
     "main": "./src/server.ts",
@@ -21,7 +21,8 @@
         "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
         "format": "prettier --ignore-path .prettierignore --write \"**/*.+(ts|js)\""
     },
-    "author": "Fathi Redaallah",
+    "author": "Fathi Redaallah, Jai Mehdi",
+    "private": true,
     "engines": {
         "node": ">=18.0.0"
     },
