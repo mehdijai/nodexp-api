@@ -9,7 +9,7 @@
     "scripts": {
         "dev": "nodemon -r tsconfig-paths/register src/server.ts",
         "prebuild": "npm run clean:build",
-        "build": "npm run build && npm run start",
+        "build": "tsc && npm run start",
         "start": "node dist/server.js",
         "clean:build": "rm -rf dist",
         "seed": "ts-node prisma/seed.ts",
