@@ -42,4 +42,4 @@ The controllers are auto-detected. They should be inside `controllers` directory
 
 ## Controller Pattern tutorial
 
-For a detailed guide on creating and implementing these controllers, check out my article: [Create NodeJS/ExpressJS API using Controller Pattern](https://mehdijai.hashnode.dev/node-exp-controller-pattern). In this article, I provide an in-depth explanation of the process and behavior of these controllers.
+For a detailed guide on creating and implementing these controllers, check out my article: [Create NodeJS/ExpressJS API using Controller Pattern](https://mehdijai.hashnode.dev/step-by-step-guide-to-creating-a-nodejsexpressjs-api-using-controller-pattern). In this article, I provide an in-depth explanation of the process and behavior of these controllers.
