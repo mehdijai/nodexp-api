@@ -39,3 +39,7 @@ npm run seed
 ## Controllers
 
 The controllers are auto-detected. They should be inside `controllers` directory and match `*.controller.ts` (The detecting is recursive).
+
+## Controller Pattern tutorial
+
+For a detailed guide on creating and implementing these controllers, check out my article: [Create NodeJS/ExpressJS API using Controller Pattern](https://mehdijai.hashnode.dev/node-exp-controller-pattern). In this article, I provide an in-depth explanation of the process and behavior of these controllers.
